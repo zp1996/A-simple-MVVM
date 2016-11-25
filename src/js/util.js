@@ -11,12 +11,21 @@ exports.copy = function(obj) {
 exports.hasOwn = function(obj, key) {
 	return Object.prototype.hasOwnProperty.call(obj, key);
 };
-exports.def = function(value, key, obj, enumerable) {
-	console.log(obj);
+exports.def = function(obj, key, value, enumerable) {
 	Object.defineProperty(obj, key, {
 		value: value,
 		writeable: true,
 		configurable: true,
 		enumerable: !!enumerable
 	});
+};
+exports.remove = function(arr, val) {
+	var index = arr.indexOf(val);
+	if (~index) {
+		arr.splice(index, 1);
+	}
+};
+exports.replace = function(nodeA, nodeB) {
+	const parent = nodeA.parentNode;
+	parent.replaceChild(nodeB, nodeA);
 };

@@ -1,5 +1,6 @@
 import observer from "./observer";
-import {isFunction, copy} from "./util";
+import {isFunction, copy, replace} from "./util";
+import compile from "./compile";
 
 class MVVM {
 	constructor(opts) {
@@ -15,7 +16,10 @@ class MVVM {
 			// Vue在此处还考虑到了是否在props是否有该属性
 			this._proxy(keys[i]);
 		}
+		// 将数据全部转换为getter/setter形式
 		observer(data);
+		// 对模板进行编译
+		this._compile();
 	}
 	_proxy(key) {
 		Object.defineProperty(this, key, {
@@ -28,6 +32,10 @@ class MVVM {
 				this._data[key] = val;
 			}
 		});
+	}
+	_compile() {
+		this.el = document.querySelector(this.el);
+		replace(this.el, compile(this.el, this));
 	}
 }
 

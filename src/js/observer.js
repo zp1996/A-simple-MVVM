@@ -1,4 +1,5 @@
 import {hasOwn, def} from "./util";
+import Dep from "./dep";
 
 class Observer{
 	constructor(value) {
@@ -52,6 +53,5 @@ function observer(value) {
 	}
 	return new Observer(value);
 }
-class Dep{}
 
 module.exports = observer;

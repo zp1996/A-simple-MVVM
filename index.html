@@ -5,26 +5,23 @@
 		<title>A Simple MVVM</title>
 	</head>
 	<body>
-		<div class="app">
-			Hello World!
+		<input id="app" type="text" v-model="html">
+		<div id="app" v-text="message.value">
+			<h1>{{message}}</h1>
+			<h2>{{message}}</h2>
 		</div>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
 			var data = {
-				message: "hello world"
+				message: {
+					value: "hello world"
+				},
+				html: "<h1>Hello World</h1>"
 			};
 			var vm = new mvvm({
 				el: "#app",
 				data: data
 			});
-			var vm1 = new mvvm({
-				el: "#app1",
-				data: data
-			});
-			console.log(vm, vm1);
-			console.log(vm.message, vm1.message);
-			vm.message = "12345";
-			console.log(vm.message, vm1.message);
 		</script>
 	</body>
 </html>

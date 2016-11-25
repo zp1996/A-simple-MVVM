@@ -26,6 +26,10 @@ var _createClass3 = _interopRequireDefault(_createClass2);
 
 var _util = require("./util");
 
+var _dep = require("./dep");
+
+var _dep2 = _interopRequireDefault(_dep);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Observer = function () {
@@ -52,7 +56,7 @@ var Observer = function () {
 }();
 
 function defineReactive(obj, key, val) {
-	var dep = new Dep(),
+	var dep = new _dep2.default(),
 	    property = (0, _getOwnPropertyDescriptor2.default)(obj, key);
 	if (property && !property.configurable) {
 		return void 0;
@@ -62,7 +66,7 @@ function defineReactive(obj, key, val) {
 		configurable: true,
 		enumerable: true,
 		get: function get() {
-			if (Dep.target) {
+			if (_dep2.default.target) {
 				dep.depend();
 				if (childOb) {
 					childOb.dep.depend();
@@ -88,9 +92,5 @@ function observer(value) {
 	}
 	return new Observer(value);
 }
-
-var Dep = function Dep() {
-	(0, _classCallCheck3.default)(this, Dep);
-};
 
 module.exports = observer;
