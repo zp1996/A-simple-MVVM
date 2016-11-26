@@ -5,10 +5,11 @@
 		<title>A Simple MVVM</title>
 	</head>
 	<body>
-		<input id="app" type="text" v-model="html">
-		<div id="app" v-text="message.value">
-			<h1>{{message}}</h1>
-			<h2>{{message}}</h2>
+		<!-- <input id="app" type="text" v-model="html" value="11"> -->
+		<div id="app">
+			<h1 v-text="message.value">{{text}}</h1>
+			<h2 v-html="html"></h2>
+			{{{html}}}1111{{message.value}}
 		</div>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
@@ -16,7 +17,8 @@
 				message: {
 					value: "hello world"
 				},
-				html: "<h1>Hello World</h1>"
+				html: "<h3>Hello World</h3>",
+				text: "zp1996"
 			};
 			var vm = new mvvm({
 				el: "#app",

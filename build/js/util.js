@@ -37,3 +37,6 @@ exports.replace = function (nodeA, nodeB) {
 	var parent = nodeA.parentNode;
 	parent.replaceChild(nodeB, nodeA);
 };
+exports.isScript = function (node) {
+	return node.tagName === "SCRIPT";
+};
