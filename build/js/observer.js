@@ -39,6 +39,7 @@ var Observer = function () {
 		this.value = value;
 		(0, _util.def)(value, "__ob__", this);
 		this.walk(value);
+		this.dep = new _dep2.default();
 	}
 
 	(0, _createClass3.default)(Observer, [{
@@ -67,6 +68,7 @@ function defineReactive(obj, key, val) {
 		enumerable: true,
 		get: function get() {
 			if (_dep2.default.target) {
+				// 关联数据与dom节点
 				dep.depend();
 				if (childOb) {
 					childOb.dep.depend();
@@ -80,7 +82,7 @@ function defineReactive(obj, key, val) {
 			}
 			val = newVal;
 			childOb = observer(val);
-			//dep.notify();
+			dep.notify();
 		}
 	});
 }

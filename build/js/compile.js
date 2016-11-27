@@ -4,6 +4,10 @@ var _getIterator2 = require("babel-runtime/core-js/get-iterator");
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
 
+var _watcher = require("./watcher");
+
+var _watcher2 = _interopRequireDefault(_watcher);
+
 var _util = require("./util");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -24,7 +28,7 @@ var updateCollection = {
 	text: function text(ele, value) {
 		ele.textContent = value == null ? "" : value;
 	},
-	html: function html(ele, value) {
+	html: function html(ele, value, parent) {
 		cacheDiv.innerHTML = value;
 		var childs = cacheDiv.childNodes;
 		var _iteratorNormalCompletion = true;
@@ -52,8 +56,19 @@ var updateCollection = {
 			}
 		}
 	},
-	model: function model(ele, value) {
+	model: function model(ele, value, vm, path) {
 		ele.value = value == null ? "" : value;
+		// input的事件有bug存在,无法配合中文输入法
+		// vue考虑到了ie9,利用了cut与keyup事件
+		// 此处不考虑ie9,故采用compositionstart与compositionend
+		ele.addEventListener("input", function (e) {
+			var newValue = e.target.value;
+			if (value === newValue) {
+				return void 0;
+			}
+			(0, _util.setValue)(vm, path, newValue);
+			value = newValue;
+		}, false);
 	}
 };
 // 指定集合
@@ -69,6 +84,12 @@ var dirCollection = {
 			BaseDir(node, vm, path, "model");
 		} else {
 			throw new Error("v-model just can use in input or textarea");
+		}
+	},
+	eventDir: function eventDir(node, type, vm, fn) {
+		var method = vm.$options.methods && vm.$options.methods[fn];
+		if (method) {
+			node.addEventListener(type, method.bind(vm), false);
 		}
 	}
 };
@@ -123,7 +144,9 @@ function compileElement(node, vm) {
 		if (dirRE.test(name)) {
 			var dir;
 			// 事件指令
-			if ((dir = name.match(eventRE)) && (dir = dir[1])) {} else {
+			if ((dir = name.match(eventRE)) && (dir = dir[1])) {
+				dirCollection["eventDir"](node, dir, vm, value);
+			} else {
 				dir = name.match(dirRE)[1];
 				dirCollection[dir](node, vm, value);
 			}
@@ -192,28 +215,11 @@ function parseText(node) {
 	}
 	return tokens;
 }
-function getValue(vm, path) {
-	var val = vm._data;
-	path = path.split(".");
-	path.forEach(function (key) {
-		val = val[key];
-	});
-	return val;
-}
-function setValue(vm, path, value) {
-	var val = vm._data;
-	path = path.split(".");
-	var len = path.length;
-	path.forEach(function (k, i) {
-		if (i < len - 1) {
-			val = val[k];
-		} else {
-			val[k] = value;
-		}
-	});
-}
 function BaseDir(node, vm, path, dir) {
 	var fn = updateCollection[dir];
-	fn && fn(node, getValue(vm, path));
+	fn && fn(node, (0, _util.getValue)(vm, path), vm, path);
+	new _watcher2.default(vm, path, function (value) {
+		fn && fn(node, value, vm, path);
+	});
 }
 module.exports = compile;

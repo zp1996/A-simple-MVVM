@@ -4,6 +4,14 @@ var _defineProperty = require("babel-runtime/core-js/object/define-property");
 
 var _defineProperty2 = _interopRequireDefault(_defineProperty);
 
+var _stringify = require("babel-runtime/core-js/json/stringify");
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _typeof2 = require("babel-runtime/helpers/typeof");
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.isFunction = function (fn) {
@@ -12,7 +20,7 @@ exports.isFunction = function (fn) {
 exports.copy = function (obj) {
 	var res = {};
 	for (var key in obj) {
-		res[key] = obj[key];
+		res[key] = (0, _typeof3.default)(obj[key]) === "object" ? JSON.parse((0, _stringify2.default)(obj[key])) : obj[key];
 	}
 	return res;
 };
@@ -39,4 +47,24 @@ exports.replace = function (nodeA, nodeB) {
 };
 exports.isScript = function (node) {
 	return node.tagName === "SCRIPT";
+};
+exports.getValue = function (vm, path) {
+	var val = vm._data;
+	path = path.split(".");
+	path.forEach(function (key) {
+		val = val[key];
+	});
+	return val;
+};
+exports.setValue = function (vm, path, value) {
+	var val = vm._data;
+	path = path.split(".");
+	var len = path.length;
+	path.forEach(function (k, i) {
+		if (i < len - 1) {
+			val = val[k];
+		} else {
+			val[k] = value;
+		}
+	});
 };

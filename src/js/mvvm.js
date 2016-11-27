@@ -8,7 +8,6 @@ class MVVM {
 		this.el = opts.el;
 		var data = this._data = isFunction(opts.data) ? 
 			opts.data() : copy(opts.data);
-
 		// vm._data.x => vm.x,方便外界访问
 		const keys = Object.keys(data);
 		var i = keys.length;
@@ -39,4 +38,4 @@ class MVVM {
 	}
 }
 
-window.mvvm = MVVM;
+window.Mvvm = MVVM;

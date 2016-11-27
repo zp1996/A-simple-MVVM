@@ -17,15 +17,12 @@ var uid = 0;
 var Dep = function () {
 	function Dep() {
 		(0, _classCallCheck3.default)(this, Dep);
+
+		this.id = uid++;
+		this.subs = []; // 存储watcher
 	}
 
 	(0, _createClass3.default)(Dep, [{
-		key: "constrcutor",
-		value: function constrcutor() {
-			this.id = uid++;
-			this.subs = [];
-		}
-	}, {
 		key: "addSub",
 		value: function addSub(sub) {
 			this.subs.push(sub);
@@ -38,11 +35,13 @@ var Dep = function () {
 	}, {
 		key: "depend",
 		value: function depend() {
+			// 将相关的watcher添加到subs中
 			Dep.target.addDep(this);
 		}
 	}, {
 		key: "notify",
 		value: function notify() {
+			// 遍历与该数据有关的Watcher
 			this.subs.forEach(function (val) {
 				val.update();
 			});

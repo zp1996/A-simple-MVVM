@@ -1,4 +1,10 @@
-import {isScript, replace} from "./util";
+import Watcher from "./watcher";
+import {
+	isScript, 
+	replace,
+	getValue,
+	setValue
+} from "./util";
 
 const dirRE = /^v-(.*)$/,
 	eventRE = /^v-on:(.*)$/,
@@ -16,15 +22,26 @@ const updateCollection = {
 	text: (ele, value) => {
 		ele.textContent = value == null ? "" : value;
 	},
-	html: (ele, value) => {
+	html: (ele, value, parent) => {
 		cacheDiv.innerHTML = value;
 		const childs = cacheDiv.childNodes;
 		for (let child of childs) {
 			ele.appendChild(child);
 		}
 	},
-	model: (ele, value) => {
+	model: (ele, value, vm, path) => {
 		ele.value = value == null ? "" : value;
+		// input的事件有bug存在,无法配合中文输入法
+		// vue考虑到了ie9,利用了cut与keyup事件
+		// 此处不考虑ie9,故采用compositionstart与compositionend
+		ele.addEventListener("input", (e) => {
+			var newValue = e.target.value;
+			if (value === newValue) {
+				return void 0;
+			}
+			setValue(vm, path, newValue);
+			value = newValue;
+		}, false);
 	}
 };
 // 指定集合
@@ -40,6 +57,12 @@ const dirCollection = {
 			BaseDir(node, vm, path, "model");
 		} else {
 			throw new Error("v-model just can use in input or textarea");
+		}
+	},
+	eventDir: (node, type, vm, fn) => {
+		const method = vm.$options.methods && vm.$options.methods[fn];
+		if (method) {
+			node.addEventListener(type, method.bind(vm), false);
 		}
 	}
 };
@@ -77,7 +100,7 @@ function compileElement(node, vm) {
 				(dir = name.match(eventRE)) && 
 				(dir = dir[1])
 			) {
-				
+				dirCollection["eventDir"](node, dir, vm, value);
 			} else {
 				dir = name.match(dirRE)[1];
 				dirCollection[dir](node, vm, value);
@@ -146,28 +169,11 @@ function parseText(node) {
 	}
 	return tokens;
 }
-function getValue(vm, path) {
-	var val = vm._data;
-	path = path.split(".");
-	path.forEach((key) => {
-		val = val[key];
-	});
-	return val;
-}
-function setValue(vm, path, value) {
-	var val = vm._data;
-	path = path.split(".");
-	const len = path.length;
-	path.forEach((k, i) => {
-		if (i < len - 1) {
-			val = val[k];
-		} else {
-			val[k] = value;
-		}
-	});
-}
 function BaseDir(node, vm, path, dir) {
 	const fn = updateCollection[dir];
-	fn && fn(node, getValue(vm, path));
+	fn && fn(node, getValue(vm, path), vm, path);
+	new Watcher(vm, path, (value) => {
+		fn && fn(node, value, vm, path);
+	});
 }
 module.exports = compile;

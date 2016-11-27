@@ -5,7 +5,8 @@ class Observer{
 	constructor(value) {
 		this.value = value;
 		def(value, "__ob__", this);
-		this.walk(value);     
+		this.walk(value);
+		this.dep = new Dep();     
 	}
 	walk(obj) {
 		const keys = Object.keys(obj);
@@ -26,6 +27,7 @@ function defineReactive(obj, key, val) {
 		enumerable: true,
 		get: () => {
 			if (Dep.target) {
+				// 关联数据与dom节点
 				dep.depend();
 				if (childOb) {
 					childOb.dep.depend();
@@ -39,7 +41,7 @@ function defineReactive(obj, key, val) {
 			}
 			val = newVal;
 			childOb = observer(val);
-			//dep.notify();
+			dep.notify();
 		}
 	});
 }

@@ -5,25 +5,54 @@
 		<title>A Simple MVVM</title>
 	</head>
 	<body>
-		<!-- <input id="app" type="text" v-model="html" value="11"> -->
 		<div id="app">
-			<h1 v-text="message.value">{{text}}</h1>
-			<h2 v-html="html"></h2>
-			{{{html}}}1111{{message.value}}
+			<h1>11111  |{{message.value}}| 111111</h1>
+			<h1>{{message.value}}</h1>
+			<input type="text" v-model="text">
+			<h2>{{text}}</h2>
+			<div v-html="html"></div>
+			<button v-on:click="test">点我</button>
+		</div>
+		<div id="app1">
+			<h1>11111  |{{message.value}}| 111111</h1>
+			<h1>{{message.value}}</h1>
+			<h2>{{text}}</h2>
+			<div v-html="html"></div>
+			<button v-on:click="test">点我</button>
 		</div>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
+			var index1 = 0,
+				index2 = 0;
 			var data = {
 				message: {
-					value: "hello world"
+					value: "Hello World!"
 				},
 				html: "<h3>Hello World</h3>",
 				text: "zp1996"
 			};
-			var vm = new mvvm({
+			new Mvvm({
 				el: "#app",
-				data: data
+				data: data,
+				methods: {
+					test: function() {
+						this.message.value = index1++;
+					}
+				}
 			});
+			new Mvvm({
+				el: "#app1",
+				data: data,
+				methods: {
+					test: function() {
+						this.message.value = index2++;
+					}
+				}
+			});
+			// setTimeout(() => {
+			// 	data.message.value = "<h1>1234567890</h1>";
+			// 	console.log("finished");
+			// }, 2000);
 		</script>
 	</body>
 </html>
