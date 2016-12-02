@@ -29,29 +29,64 @@ var updateCollection = {
 		ele.textContent = value == null ? "" : value;
 	},
 	html: function html(ele, value, parent) {
-		cacheDiv.innerHTML = value;
-		var childs = cacheDiv.childNodes;
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
+		console.log(ele, parent);
+		if (!parent) {
+			ele.innerHTML = value;
+		} else {
+			// 解析插值html
+			cacheDiv.innerHTML = value;
+			var childs = cacheDiv.childNodes;
+			if (ele.childNodes.length) {
+				var first = ele.firstChild;
+				console.log(first);
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
 
-		try {
-			for (var _iterator = (0, _getIterator3.default)(childs), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				var child = _step.value;
+				try {
+					for (var _iterator = (0, _getIterator3.default)(childs), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var child = _step.value;
 
-				ele.appendChild(child);
-			}
-		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
+						(0, _util.insertBefore)(child, first);
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
 				}
-			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
+			} else {
+				var _iteratorNormalCompletion2 = true;
+				var _didIteratorError2 = false;
+				var _iteratorError2 = undefined;
+
+				try {
+					for (var _iterator2 = (0, _getIterator3.default)(childs), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+						var _child = _step2.value;
+
+						ele.appendChild(_child);
+					}
+				} catch (err) {
+					_didIteratorError2 = true;
+					_iteratorError2 = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion2 && _iterator2.return) {
+							_iterator2.return();
+						}
+					} finally {
+						if (_didIteratorError2) {
+							throw _iteratorError2;
+						}
+					}
 				}
 			}
 		}
@@ -76,8 +111,8 @@ var dirCollection = {
 	text: function text(node, vm, path) {
 		BaseDir(node, vm, path, "text");
 	},
-	html: function html(node, vm, path) {
-		BaseDir(node, vm, path, "html");
+	html: function html(node, vm, path, parent) {
+		BaseDir(node, vm, path, "html", parent);
 	},
 	model: function model(node, vm, path) {
 		if (vmodel[node.tagName]) {
@@ -110,27 +145,27 @@ function compileNode(node, vm) {
 	}
 }
 function compileNodeList(nodes, vm) {
-	var _iteratorNormalCompletion2 = true;
-	var _didIteratorError2 = false;
-	var _iteratorError2 = undefined;
+	var _iteratorNormalCompletion3 = true;
+	var _didIteratorError3 = false;
+	var _iteratorError3 = undefined;
 
 	try {
-		for (var _iterator2 = (0, _getIterator3.default)(nodes), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-			var val = _step2.value;
+		for (var _iterator3 = (0, _getIterator3.default)(nodes), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+			var val = _step3.value;
 
 			compileNode(val, vm);
 		}
 	} catch (err) {
-		_didIteratorError2 = true;
-		_iteratorError2 = err;
+		_didIteratorError3 = true;
+		_iteratorError3 = err;
 	} finally {
 		try {
-			if (!_iteratorNormalCompletion2 && _iterator2.return) {
-				_iterator2.return();
+			if (!_iteratorNormalCompletion3 && _iterator3.return) {
+				_iterator3.return();
 			}
 		} finally {
-			if (_didIteratorError2) {
-				throw _iteratorError2;
+			if (_didIteratorError3) {
+				throw _iteratorError3;
 			}
 		}
 	}
@@ -169,7 +204,7 @@ function compileTextNode(node, vm) {
 		if (token.tag) {
 			if (token.html) {
 				el = document.createDocumentFragment();
-				dirCollection["html"](el, vm, token.value);
+				dirCollection["html"](el, vm, token.value, node.parentNode);
 			} else {
 				el = document.createTextNode(" ");
 				dirCollection["text"](el, vm, token.value);
@@ -215,11 +250,17 @@ function parseText(node) {
 	}
 	return tokens;
 }
-function BaseDir(node, vm, path, dir) {
+function BaseDir(node, vm, path, dir, parent) {
 	var fn = updateCollection[dir];
 	fn && fn(node, (0, _util.getValue)(vm, path), vm, path);
-	new _watcher2.default(vm, path, function (value) {
-		fn && fn(node, value, vm, path);
-	});
+	if (dir === "html") {
+		new _watcher2.default(vm, path, function (value) {
+			fn && fn(node, value, parent);
+		});
+	} else {
+		new _watcher2.default(vm, path, function (value) {
+			fn && fn(node, value, vm, path);
+		});
+	}
 }
 module.exports = compile;

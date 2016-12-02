@@ -4,7 +4,8 @@ import {
 	replace,
 	getValue,
 	setValue,
-	nextTick
+	nextTick,
+	insertBefore
 } from "./util";
 
 const dirRE = /^v-(.*)$/,
@@ -24,10 +25,24 @@ const updateCollection = {
 		ele.textContent = value == null ? "" : value;
 	},
 	html: (ele, value, parent) => {
-		cacheDiv.innerHTML = value;
-		const childs = cacheDiv.childNodes;
-		for (let child of childs) {
-			ele.appendChild(child);
+		console.log(ele, parent);
+		if (!parent) {
+			ele.innerHTML = value;
+		} else {
+			// 解析插值html
+			cacheDiv.innerHTML = value;
+			const childs = cacheDiv.childNodes;
+			if (ele.childNodes.length) {
+				const first = ele.firstChild;
+				console.log(first);
+				for (let child of childs) {
+					insertBefore(child, first);
+				}
+			} else {
+				for (let child of childs) {
+					ele.appendChild(child);
+				}
+			}
 		}
 	},
 	model: (ele, value, vm, path) => {
@@ -51,8 +66,8 @@ const dirCollection = {
 	text: (node, vm, path) => {
 		BaseDir(node, vm, path, "text");
 	},
-	html: (node, vm, path) => {
-		BaseDir(node, vm, path, "html");
+	html: (node, vm, path, parent) => {
+		BaseDir(node, vm, path, "html", parent);
 	},
 	model: (node, vm, path) => {
 		if (vmodel[node.tagName]) {
@@ -128,7 +143,7 @@ function compileTextNode(node, vm) {
 		if (token.tag) {
 			if (token.html) {
 				el = document.createDocumentFragment();
-				dirCollection["html"](el, vm, token.value);
+				dirCollection["html"](el, vm, token.value, node.parentNode);
 			} else {
 				el = document.createTextNode(" ");
 				dirCollection["text"](el, vm, token.value);
@@ -171,11 +186,18 @@ function parseText(node) {
 	}
 	return tokens;
 }
-function BaseDir(node, vm, path, dir) {
+function BaseDir(node, vm, path, dir, parent) {
 	const fn = updateCollection[dir];
 	fn && fn(node, getValue(vm, path), vm, path);
-	new Watcher(vm, path, (value) => {
-		fn && fn(node, value, vm, path);
-	});
+	console.log(dir, parent);
+	if (dir === "html") {
+		new Watcher(vm, path, (value) => {
+			fn && fn(node, value, parent);
+		});
+	} else {
+		new Watcher(vm, path, (value) => {
+			fn && fn(node, value, vm, path);
+		});
+	}
 }
 module.exports = compile;

@@ -29,19 +29,24 @@
 				<input type="text" v-model="mobile" v-on:change="mobile"/>
 			</div>
 			<input type="button" value="提交" v-on:click="submit" />
+			<div v-html="html"></div>
+			{{{html}}}
+			<input type="button" value="提交" v-on:click="changehtml" />
 		</form>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
 			const passwordRE = /^\w{6, 16}$/,
 				nameRE = /^\w{8, 18}$/,
-				mobileRE = /^1[3,5,7,8]\d{9}$/
+				mobileRE = /^1[3,5,7,8]\d{9}$/;
+			var flag = false;
 			new Mvvm({
 				el: "#app",
 				data: () => {
 					return {
 						name: "",
 						password: "",
-						mobile: ""
+						mobile: "",
+						html: "<h1>Hello World</h1>"
 					};
 				},
 				methods: {
@@ -51,6 +56,9 @@
 							password: this.password,
 							mobile: this.mobile
 						});
+					},
+					changehtml: function() {
+						this.html = `<h1>${Math.random()}</h1>`;
 					},
 					mobile: function() {
 						var flag = mobileRE.test(this.mobile);

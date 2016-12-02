@@ -30,6 +30,10 @@ exports.replace = function(nodeA, nodeB) {
 	const parent = nodeA.parentNode;
 	parent.replaceChild(nodeB, nodeA);
 };
+exports.insertBefore = function(nodeA, nodeB) {
+	const parent = nodeA.parentNode;
+	parent.insertBefore(nodeB, nodeA);
+};
 exports.isScript = function(node) {
 	return node.tagName === "SCRIPT";
 };
