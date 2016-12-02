@@ -1,6 +1,12 @@
 import observer from "./observer";
-import {isFunction, copy, replace} from "./util";
 import compile from "./compile";
+import {
+	isFunction, 
+	copy, 
+	replace,
+	nextTick
+} from "./util";
+
 
 class MVVM {
 	constructor(opts) {
@@ -31,6 +37,10 @@ class MVVM {
 				this._data[key] = val;
 			}
 		});
+	}
+	$nextTick(cb) {
+		console.log(cb);
+		nextTick(cb, this);
 	}
 	_compile() {
 		this.el = document.querySelector(this.el);

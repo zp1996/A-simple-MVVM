@@ -3,7 +3,8 @@ import {
 	isScript, 
 	replace,
 	getValue,
-	setValue
+	setValue,
+	nextTick
 } from "./util";
 
 const dirRE = /^v-(.*)$/,
@@ -30,17 +31,18 @@ const updateCollection = {
 		}
 	},
 	model: (ele, value, vm, path) => {
-		ele.value = value == null ? "" : value;
-		// input的事件有bug存在,无法配合中文输入法
-		// vue考虑到了ie9,利用了cut与keyup事件
-		// 此处不考虑ie9,故采用compositionstart与compositionend
+		// 视图->模型，不用设置value值
+		if (ele.value !== value)
+			ele.value = value == null ? "" : value;
 		ele.addEventListener("input", (e) => {
 			var newValue = e.target.value;
 			if (value === newValue) {
 				return void 0;
 			}
-			setValue(vm, path, newValue);
 			value = newValue;
+			nextTick(() => {
+				setValue(vm, path, newValue);
+			});
 		}, false);
 	}
 };

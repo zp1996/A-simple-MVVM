@@ -1,9 +1,10 @@
 import Dep from "./dep";
 import {
 	hasOwn,
-	getValue
+	getValue,
+	nextTick
 } from "./util";
-
+var p = Promise.resolve();
 class Watcher{
 	constructor(vm, exp, cb) {
 		this.cb = cb;    // 更新UI函数
@@ -16,7 +17,9 @@ class Watcher{
 		const val = this.get();
 		if (val !== this.value) {
 			this.value = val;
-			this.cb.call(null, val);
+			nextTick(() => {
+				this.cb.call(null, val);
+			});
 		}
 	}
 	addDep(dep) {

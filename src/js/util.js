@@ -53,3 +53,55 @@ exports.setValue = function(vm, path, value) {
 		}
 	});
 };
+function isNative (fn) {
+	return /native code/.test(fn.toString());
+}
+exports.nextTick = (function () {
+	var callbacks = [];   // 更新dom队列
+	var pending = false;
+	var timerFunc;
+	// 发布事件函数
+	function nextTickHandler() {
+		pending = false;
+		var copies = callbacks.slice(0);
+		callbacks.length = 0; // 发布完成后清空队列
+		copies.forEach(cb => {
+			cb();
+		});
+	}
+	if (typeof Promise !== "undefined" && isNative(Promise)) {
+		var p = Promise.resolve();
+		timerFunc = function() {
+			p.then(nextTickHandler);
+		};
+	} else if (
+		typeof MutationObserver !== "undefined" && 
+		isNative(MutationObserver)
+	) {
+		var counter = 1;
+    var observer = new MutationObserver(nextTickHandler);
+    var textNode = document.createTextNode(counter);
+    observer.observe(textNode, {
+      characterData: true
+    });
+    timerFunc = function () {  
+      // 每次调用timerFunc会触发nextTickHandler
+      counter = (counter + 1) % 2;
+      textNode.data = counter;
+    };
+	} else {
+		timerFunc = function() {
+			setTimeout(nextTickHandler);
+		}
+	}
+	return function(cb, ctx) {
+		var func = ctx ? function () {
+			cb.call(ctx);
+		} : cb;
+		callbacks.push(func);
+		if (!pending) {    // 注册一个回调
+			pending = true;
+			timerFunc();
+		}
+	}
+})();

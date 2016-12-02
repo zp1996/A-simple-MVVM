@@ -3,56 +3,62 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>A Simple MVVM</title>
+		<style type="text/css">
+			.f-line{
+				margin: 10px auto;
+			}
+			.f-line label{
+				width: 100px;
+				display: inline-block;
+				text-align: right;
+			}
+		</style>
 	</head>
 	<body>
-		<div id="app">
-			<h1>11111  |{{message.value}}| 111111</h1>
-			<h1>{{message.value}}</h1>
-			<input type="text" v-model="text">
-			<h2>{{text}}</h2>
-			<div v-html="html"></div>
-			<button v-on:click="test">点我</button>
-		</div>
-		<div id="app1">
-			<h1>11111  |{{message.value}}| 111111</h1>
-			<h1>{{message.value}}</h1>
-			<h2>{{text}}</h2>
-			<div v-html="html"></div>
-			<button v-on:click="test">点我</button>
-		</div>
+		<form id="app">
+			<div class="f-line">
+				<label>姓名：</label>
+				<input type="text" v-model="name" />
+			</div>
+			<div class="f-line">
+				<label>密码：</label>
+				<input type="password" v-model="password" />
+			</div>
+			<div class="f-line">
+				<label>手机号：</label>
+				<input type="text" v-model="mobile" v-on:change="mobile"/>
+			</div>
+			<input type="button" value="提交" v-on:click="submit" />
+		</form>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
-			var index1 = 0,
-				index2 = 0;
-			var data = {
-				message: {
-					value: "Hello World!"
-				},
-				html: "<h3>Hello World</h3>",
-				text: "zp1996"
-			};
+			const passwordRE = /^\w{6, 16}$/,
+				nameRE = /^\w{8, 18}$/,
+				mobileRE = /^1[3,5,7,8]\d{9}$/
 			new Mvvm({
 				el: "#app",
-				data: data,
+				data: () => {
+					return {
+						name: "",
+						password: "",
+						mobile: ""
+					};
+				},
 				methods: {
-					test: function() {
-						this.message.value = index1++;
+					submit: function() {
+						console.log({
+							name: this.name,
+							password: this.password,
+							mobile: this.mobile
+						});
+					},
+					mobile: function() {
+						var flag = mobileRE.test(this.mobile);
+						console.log(flag);
+						return flag;
 					}
 				}
 			});
-			new Mvvm({
-				el: "#app1",
-				data: data,
-				methods: {
-					test: function() {
-						this.message.value = index2++;
-					}
-				}
-			});
-			// setTimeout(() => {
-			// 	data.message.value = "<h1>1234567890</h1>";
-			// 	console.log("finished");
-			// }, 2000);
 		</script>
 	</body>
 </html>

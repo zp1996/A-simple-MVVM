@@ -8,6 +8,10 @@ var _createClass2 = require("babel-runtime/helpers/createClass");
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
+var _promise = require("babel-runtime/core-js/promise");
+
+var _promise2 = _interopRequireDefault(_promise);
+
 var _dep = require("./dep");
 
 var _dep2 = _interopRequireDefault(_dep);
@@ -15,6 +19,8 @@ var _dep2 = _interopRequireDefault(_dep);
 var _util = require("./util");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var p = _promise2.default.resolve();
 
 var Watcher = function () {
 	function Watcher(vm, exp, cb) {
@@ -30,10 +36,14 @@ var Watcher = function () {
 	(0, _createClass3.default)(Watcher, [{
 		key: "update",
 		value: function update() {
+			var _this = this;
+
 			var val = this.get();
 			if (val !== this.value) {
 				this.value = val;
-				this.cb.call(null, val);
+				(0, _util.nextTick)(function () {
+					_this.cb.call(null, val);
+				});
 			}
 		}
 	}, {
