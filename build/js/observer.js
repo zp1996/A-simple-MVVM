@@ -62,11 +62,17 @@ function defineReactive(obj, key, val) {
 	if (property && !property.configurable) {
 		return void 0;
 	}
-	var childOb = observer(val);
+	// 对于数据关联计算情况下,应调用自身所写的get/set
+	// 如: data.a = 1; data.b = data.a + 1;
+	// 要想a,b全部为响应式的,则需要手动设置a的set
+	var getter = property.get,
+	    setter = property.set,
+	    childOb = observer(val);
 	(0, _defineProperty2.default)(obj, key, {
 		configurable: true,
 		enumerable: true,
 		get: function get() {
+			var value = getter ? getter.call(obj) : val;
 			if (_dep2.default.target) {
 				// 关联数据与dom节点
 				dep.depend();
@@ -74,13 +80,18 @@ function defineReactive(obj, key, val) {
 					childOb.dep.depend();
 				}
 			}
-			return val;
+			return value;
 		},
 		set: function set(newVal) {
-			if (newVal === val) {
+			var value = getter ? getter.call(obj) : val;
+			if (newVal === value) {
 				return void 0;
 			}
-			val = newVal;
+			if (setter) {
+				setter.call(obj, newVal);
+			} else {
+				val = newVal;
+			}
 			childOb = observer(val);
 			dep.notify();
 		}

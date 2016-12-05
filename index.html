@@ -29,9 +29,12 @@
 				<input type="text" v-model="mobile" v-on:change="mobile"/>
 			</div>
 			<input type="button" value="提交" v-on:click="submit" />
+			<input type="text" v-model="html" />
 			<div v-html="html"></div>
 			{{{html}}}
 			<input type="button" value="提交" v-on:click="changehtml" />
+			<h1>{{a}} + {{b}} = {{c}}</h1>
+			<input type="button" value="add" v-on:click="add" />
 		</form>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
@@ -42,12 +45,38 @@
 			new Mvvm({
 				el: "#app",
 				data: () => {
-					return {
+					var data = {
 						name: "",
 						password: "",
 						mobile: "",
-						html: "<h1>Hello World</h1>"
+						html: "<h1>Hello World</h1>11111"
 					};
+					var a = 1,
+						b = 1;
+					Object.defineProperty(data, "a", {
+						enumerable: true,
+						configurable: true,
+						get: function() {
+							return a;
+						},
+						set: function(val) {
+							a = val;
+							data.c = data.a + data.b;
+						}
+					});
+					Object.defineProperty(data, "b", {
+						enumerable: true,
+						configurable: true,
+						get: function() {
+							return b;
+						},
+						set: function(val) {
+							b = val;
+							data.c = data.a + data.b;
+						}
+					});
+					data.c = data.a + data.b;
+					return data;
 				},
 				methods: {
 					submit: function() {
@@ -64,6 +93,10 @@
 						var flag = mobileRE.test(this.mobile);
 						console.log(flag);
 						return flag;
+					},
+					add: function() {
+						this.a++;
+						this.b++;
 					}
 				}
 			});

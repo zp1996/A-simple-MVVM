@@ -24,24 +24,37 @@ const updateCollection = {
 	text: (ele, value) => {
 		ele.textContent = value == null ? "" : value;
 	},
-	html: (ele, value, parent) => {
-		console.log(ele, parent);
-		if (!parent) {
+	html: (ele, value) => {
+		if (!ele.$parent) {
 			ele.innerHTML = value;
 		} else {
 			// 解析插值html
 			cacheDiv.innerHTML = value;
 			const childs = cacheDiv.childNodes;
-			if (ele.childNodes.length) {
-				const first = ele.firstChild;
-				console.log(first);
-				for (let child of childs) {
-					insertBefore(child, first);
+			const doms = [];
+			var len = childs.length;
+			var c;
+			if (ele.$oneTime) {
+				// 第一次更新
+				while(len--) {
+					c = childs[0];
+					ele.appendChild(c);
+					doms.push(c);
 				}
+				ele.$doms = doms;
+				ele.$oneTime = false;
 			} else {
-				for (let child of childs) {
-					ele.appendChild(child);
+				const first = ele.$doms[0],
+					parent = first.parentNode;
+				while(len--) {
+					c = childs[0];
+					insertBefore(c, first);
+					doms.push(c);
 				}
+				ele.$doms.forEach(node => {
+					parent.removeChild(node);
+				});
+				ele.$doms = doms;
 			}
 		}
 	},
@@ -143,7 +156,9 @@ function compileTextNode(node, vm) {
 		if (token.tag) {
 			if (token.html) {
 				el = document.createDocumentFragment();
-				dirCollection["html"](el, vm, token.value, node.parentNode);
+				el.$parent = node.parentNode;
+				el.$oneTime = true;
+				dirCollection["html"](el, vm, token.value);
 			} else {
 				el = document.createTextNode(" ");
 				dirCollection["text"](el, vm, token.value);
@@ -189,15 +204,8 @@ function parseText(node) {
 function BaseDir(node, vm, path, dir, parent) {
 	const fn = updateCollection[dir];
 	fn && fn(node, getValue(vm, path), vm, path);
-	console.log(dir, parent);
-	if (dir === "html") {
-		new Watcher(vm, path, (value) => {
-			fn && fn(node, value, parent);
-		});
-	} else {
-		new Watcher(vm, path, (value) => {
-			fn && fn(node, value, vm, path);
-		});
-	}
+	new Watcher(vm, path, (value) => {
+		fn && fn(node, value, vm, path);
+	});
 }
 module.exports = compile;

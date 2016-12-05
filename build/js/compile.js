@@ -28,66 +28,39 @@ var updateCollection = {
 	text: function text(ele, value) {
 		ele.textContent = value == null ? "" : value;
 	},
-	html: function html(ele, value, parent) {
-		console.log(ele, parent);
-		if (!parent) {
+	html: function html(ele, value) {
+		if (!ele.$parent) {
 			ele.innerHTML = value;
 		} else {
 			// 解析插值html
 			cacheDiv.innerHTML = value;
 			var childs = cacheDiv.childNodes;
-			if (ele.childNodes.length) {
-				var first = ele.firstChild;
-				console.log(first);
-				var _iteratorNormalCompletion = true;
-				var _didIteratorError = false;
-				var _iteratorError = undefined;
-
-				try {
-					for (var _iterator = (0, _getIterator3.default)(childs), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-						var child = _step.value;
-
-						(0, _util.insertBefore)(child, first);
-					}
-				} catch (err) {
-					_didIteratorError = true;
-					_iteratorError = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion && _iterator.return) {
-							_iterator.return();
-						}
-					} finally {
-						if (_didIteratorError) {
-							throw _iteratorError;
-						}
-					}
+			var doms = [];
+			var len = childs.length;
+			var c;
+			if (ele.$oneTime) {
+				// 第一次更新
+				while (len--) {
+					c = childs[0];
+					ele.appendChild(c);
+					doms.push(c);
 				}
+				ele.$doms = doms;
+				ele.$oneTime = false;
 			} else {
-				var _iteratorNormalCompletion2 = true;
-				var _didIteratorError2 = false;
-				var _iteratorError2 = undefined;
-
-				try {
-					for (var _iterator2 = (0, _getIterator3.default)(childs), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-						var _child = _step2.value;
-
-						ele.appendChild(_child);
+				(function () {
+					var first = ele.$doms[0],
+					    parent = first.parentNode;
+					while (len--) {
+						c = childs[0];
+						(0, _util.insertBefore)(c, first);
+						doms.push(c);
 					}
-				} catch (err) {
-					_didIteratorError2 = true;
-					_iteratorError2 = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion2 && _iterator2.return) {
-							_iterator2.return();
-						}
-					} finally {
-						if (_didIteratorError2) {
-							throw _iteratorError2;
-						}
-					}
-				}
+					ele.$doms.forEach(function (node) {
+						parent.removeChild(node);
+					});
+					ele.$doms = doms;
+				})();
 			}
 		}
 	},
@@ -145,27 +118,27 @@ function compileNode(node, vm) {
 	}
 }
 function compileNodeList(nodes, vm) {
-	var _iteratorNormalCompletion3 = true;
-	var _didIteratorError3 = false;
-	var _iteratorError3 = undefined;
+	var _iteratorNormalCompletion = true;
+	var _didIteratorError = false;
+	var _iteratorError = undefined;
 
 	try {
-		for (var _iterator3 = (0, _getIterator3.default)(nodes), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-			var val = _step3.value;
+		for (var _iterator = (0, _getIterator3.default)(nodes), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+			var val = _step.value;
 
 			compileNode(val, vm);
 		}
 	} catch (err) {
-		_didIteratorError3 = true;
-		_iteratorError3 = err;
+		_didIteratorError = true;
+		_iteratorError = err;
 	} finally {
 		try {
-			if (!_iteratorNormalCompletion3 && _iterator3.return) {
-				_iterator3.return();
+			if (!_iteratorNormalCompletion && _iterator.return) {
+				_iterator.return();
 			}
 		} finally {
-			if (_didIteratorError3) {
-				throw _iteratorError3;
+			if (_didIteratorError) {
+				throw _iteratorError;
 			}
 		}
 	}
@@ -204,7 +177,9 @@ function compileTextNode(node, vm) {
 		if (token.tag) {
 			if (token.html) {
 				el = document.createDocumentFragment();
-				dirCollection["html"](el, vm, token.value, node.parentNode);
+				el.$parent = node.parentNode;
+				el.$oneTime = true;
+				dirCollection["html"](el, vm, token.value);
 			} else {
 				el = document.createTextNode(" ");
 				dirCollection["text"](el, vm, token.value);
@@ -253,14 +228,8 @@ function parseText(node) {
 function BaseDir(node, vm, path, dir, parent) {
 	var fn = updateCollection[dir];
 	fn && fn(node, (0, _util.getValue)(vm, path), vm, path);
-	if (dir === "html") {
-		new _watcher2.default(vm, path, function (value) {
-			fn && fn(node, value, parent);
-		});
-	} else {
-		new _watcher2.default(vm, path, function (value) {
-			fn && fn(node, value, vm, path);
-		});
-	}
+	new _watcher2.default(vm, path, function (value) {
+		fn && fn(node, value, vm, path);
+	});
 }
 module.exports = compile;

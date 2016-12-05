@@ -31,8 +31,8 @@ exports.replace = function(nodeA, nodeB) {
 	parent.replaceChild(nodeB, nodeA);
 };
 exports.insertBefore = function(nodeA, nodeB) {
-	const parent = nodeA.parentNode;
-	parent.insertBefore(nodeB, nodeA);
+	const parent = nodeB.parentNode;
+	parent.insertBefore(nodeA, nodeB);
 };
 exports.isScript = function(node) {
 	return node.tagName === "SCRIPT";
