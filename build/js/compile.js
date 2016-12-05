@@ -67,7 +67,16 @@ var updateCollection = {
 	model: function model(ele, value, vm, path) {
 		// 视图->模型，不用设置value值
 		if (ele.value !== value) ele.value = value == null ? "" : value;
+		// input事件不考虑ie9
+		var flag = true;
+		ele.addEventListener("compositionstart", function () {
+			flag = false;
+		}, false);
+		ele.addEventListener("compositionend", function () {
+			flag = true;
+		}, false);
 		ele.addEventListener("input", function (e) {
+			if (!flag) return void 0;
 			var newValue = e.target.value;
 			if (value === newValue) {
 				return void 0;

@@ -8,19 +8,19 @@ var _createClass2 = require("babel-runtime/helpers/createClass");
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
-var _promise = require("babel-runtime/core-js/promise");
-
-var _promise2 = _interopRequireDefault(_promise);
-
 var _dep = require("./dep");
 
 var _dep2 = _interopRequireDefault(_dep);
+
+var _batcher = require("./batcher");
+
+var _batcher2 = _interopRequireDefault(_batcher);
 
 var _util = require("./util");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var p = _promise2.default.resolve();
+var id = 0;
 
 var Watcher = function () {
 	function Watcher(vm, exp, cb) {
@@ -31,6 +31,7 @@ var Watcher = function () {
 		this.exp = exp;
 		this.depIds = {}; // 数据依赖集合
 		this.value = this.get();
+		this.id = id++;
 	}
 
 	(0, _createClass3.default)(Watcher, [{
@@ -42,9 +43,14 @@ var Watcher = function () {
 			if (val !== this.value) {
 				this.value = val;
 				(0, _util.nextTick)(function () {
-					_this.cb.call(null, val);
+					(0, _batcher2.default)(_this);
 				});
 			}
+		}
+	}, {
+		key: "run",
+		value: function run() {
+			this.cb.call(null, this.get());
 		}
 	}, {
 		key: "addDep",

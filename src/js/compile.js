@@ -62,7 +62,16 @@ const updateCollection = {
 		// 视图->模型，不用设置value值
 		if (ele.value !== value)
 			ele.value = value == null ? "" : value;
+		// input事件不考虑ie9
+		var flag = true;
+		ele.addEventListener("compositionstart", () => {
+			flag = false;
+		}, false);
+		ele.addEventListener("compositionend", () => {
+			flag = true;
+		}, false);
 		ele.addEventListener("input", (e) => {
+			if (!flag) return void 0;
 			var newValue = e.target.value;
 			if (value === newValue) {
 				return void 0;

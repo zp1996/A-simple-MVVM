@@ -4,18 +4,21 @@
 		<meta charset="utf-8" />
 		<title>A Simple MVVM</title>
 		<style type="text/css">
-			.f-line{
+/*			.f-line{
 				margin: 10px auto;
 			}
 			.f-line label{
 				width: 100px;
 				display: inline-block;
 				text-align: right;
+			}*/
+			input[type="text"]{
+				width: 500px;
 			}
 		</style>
 	</head>
 	<body>
-		<form id="app">
+<!-- 		<form id="app">
 			<div class="f-line">
 				<label>姓名：</label>
 				<input type="text" v-model="name" />
@@ -29,13 +32,20 @@
 				<input type="text" v-model="mobile" v-on:change="mobile"/>
 			</div>
 			<input type="button" value="提交" v-on:click="submit" />
+		</form> -->
+		<div id="app">
 			<input type="text" v-model="html" />
-			<div v-html="html"></div>
+			<p v-html="html"></p>
 			{{{html}}}
-			<input type="button" value="提交" v-on:click="changehtml" />
+			<input type="button" value="产生随机数" v-on:click="random" />
+			<hr />
+			<input type="text" v-model="text" />
+			<p v-text="text"></p>
+			{{text}}
+			<input type="button" value="反转" v-on:click="reverse" />
 			<h1>{{a}} + {{b}} = {{c}}</h1>
 			<input type="button" value="add" v-on:click="add" />
-		</form>
+		</div>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
 			const passwordRE = /^\w{6, 16}$/,
@@ -46,10 +56,8 @@
 				el: "#app",
 				data: () => {
 					var data = {
-						name: "",
-						password: "",
-						mobile: "",
-						html: "<h1>Hello World</h1>11111"
+						text: "zp1996",
+						html: "<h1>Hello World</h1>"
 					};
 					var a = 1,
 						b = 1;
@@ -79,24 +87,20 @@
 					return data;
 				},
 				methods: {
-					submit: function() {
-						console.log({
-							name: this.name,
-							password: this.password,
-							mobile: this.mobile
-						});
-					},
-					changehtml: function() {
+					random: function() {
 						this.html = `<h1>${Math.random()}</h1>`;
 					},
 					mobile: function() {
 						var flag = mobileRE.test(this.mobile);
-						console.log(flag);
 						return flag;
 					},
 					add: function() {
 						this.a++;
+						this.a++;
 						this.b++;
+					},
+					reverse: function() {
+						this.text = this.text.split('').reverse().join('');
 					}
 				}
 			});
