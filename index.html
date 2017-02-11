@@ -4,35 +4,12 @@
 		<meta charset="utf-8" />
 		<title>A Simple MVVM</title>
 		<style type="text/css">
-/*			.f-line{
-				margin: 10px auto;
-			}
-			.f-line label{
-				width: 100px;
-				display: inline-block;
-				text-align: right;
-			}*/
 			input[type="text"]{
 				width: 500px;
 			}
 		</style>
 	</head>
 	<body>
-<!-- 		<form id="app">
-			<div class="f-line">
-				<label>姓名：</label>
-				<input type="text" v-model="name" />
-			</div>
-			<div class="f-line">
-				<label>密码：</label>
-				<input type="password" v-model="password" />
-			</div>
-			<div class="f-line">
-				<label>手机号：</label>
-				<input type="text" v-model="mobile" v-on:change="mobile"/>
-			</div>
-			<input type="button" value="提交" v-on:click="submit" />
-		</form> -->
 		<div id="app">
 			<input type="text" v-model="html" />
 			<p v-html="html"></p>
@@ -43,8 +20,13 @@
 			<p v-text="text"></p>
 			{{text}}
 			<input type="button" value="反转" v-on:click="reverse" />
+			<hr />
 			<h1>{{a}} + {{b}} = {{c}}</h1>
+			<strong>遇到关联属性的时候会产生一些问题,需要自己手动绑定一个getter/setter</strong>
 			<input type="button" value="add" v-on:click="add" />
+			<hr />
+			<h2>数组目前的长度: {{items.length}}</h2>
+			<input type="button" value="add-items" v-on:click="addItems" />
 		</div>
 		<script type="text/javascript" src="./build/js/mvvm.js"></script>
 		<script type="text/javascript">
@@ -57,7 +39,14 @@
 				data: () => {
 					var data = {
 						text: "zp1996",
-						html: "<h1>Hello World</h1>"
+						html: "<h1>Hello World</h1>",
+						items: [{
+							name: 1
+						}, {
+							name: 2
+						}, {
+							name: 3
+						}]
 					};
 					var a = 1,
 						b = 1;
@@ -101,6 +90,11 @@
 					},
 					reverse: function() {
 						this.text = this.text.split('').reverse().join('');
+					},
+					addItems: function() {
+						this.items.push({
+							name: 'zp' + ~~(Math.random() * 1000)
+						});
 					}
 				}
 			});

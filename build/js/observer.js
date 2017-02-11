@@ -30,6 +30,8 @@ var _dep = require("./dep");
 
 var _dep2 = _interopRequireDefault(_dep);
 
+var _array = require("./array");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Observer = function () {
@@ -38,8 +40,14 @@ var Observer = function () {
 
 		this.value = value;
 		(0, _util.def)(value, "__ob__", this);
-		this.walk(value);
 		this.dep = new _dep2.default();
+		if (Array.isArray(value)) {
+			var augment = value.__proto__ ? protoAugment : copyAugment;
+			augment(value, _array.arrayMethods, (0, _keys2.default)(_array.arrayMethods));
+			this.observerArray(value);
+		} else {
+			this.walk(value);
+		}
 	}
 
 	(0, _createClass3.default)(Observer, [{
@@ -52,10 +60,28 @@ var Observer = function () {
 				defineReactive(_this.value, key, obj[key]);
 			});
 		}
+		// 给新增的元素增加响应式的变化
+
+	}, {
+		key: "observerArray",
+		value: function observerArray(items) {
+			for (var i = 0, l = items.length; i < l; i++) {
+				observer(items[i]);
+			}
+		}
 	}]);
 	return Observer;
 }();
 
+function protoAugment(target, src) {
+	target.__proto__ = src;
+}
+function copyAugment(target, src, keys) {
+	for (var i = 0, l = keys.length; i < l; i++) {
+		var key = keys[i];
+		(0, _util.def)(target, key, src[key]);
+	}
+}
 function defineReactive(obj, key, val) {
 	var dep = new _dep2.default(),
 	    property = (0, _getOwnPropertyDescriptor2.default)(obj, key);

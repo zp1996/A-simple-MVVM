@@ -7,7 +7,6 @@ import {
 	nextTick
 } from "./util";
 
-
 class MVVM {
 	constructor(opts) {
 		this.$options = opts;
