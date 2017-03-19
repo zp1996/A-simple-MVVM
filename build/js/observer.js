@@ -119,6 +119,7 @@ function defineReactive(obj, key, val) {
 				val = newVal;
 			}
 			childOb = observer(val);
+			// 调用watcher来更新dom
 			dep.notify();
 		}
 	});

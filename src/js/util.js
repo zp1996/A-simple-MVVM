@@ -109,3 +109,12 @@ exports.nextTick = (function () {
         }
     }
 })();
+exports.debounce = fn => {
+    let immediate = null;
+    return function(...items) {
+        if (immediate) clearImmediate(immediate);
+        immediate = setImmediate(() => {
+            fn.apply(this, items);
+        });
+    };
+};

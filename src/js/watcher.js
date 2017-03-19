@@ -3,7 +3,8 @@ import pushWatcher from "./batcher";
 import {
     hasOwn,
     getValue,
-    nextTick
+    nextTick,
+    debounce
 } from "./util";
 var id = 0;
 class Watcher{
@@ -14,6 +15,7 @@ class Watcher{
         this.depIds = {};   // 数据依赖集合
         this.value = this.get();
         this.id = id++;
+        this.run = debounce(this.run);
     }
     update() {
         const val = this.get();
